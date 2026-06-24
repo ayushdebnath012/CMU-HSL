@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Large downloaded datasets and trained models.
+data/*
+!data/.gitkeep
+outputs/*
+!outputs/.gitkeep
+external/
+
+# Generated previews and temporary files.
+presentation/~$*
+*.tmp.json
+
+# Local reference papers / assignment PDFs. Keep citations in docs instead.
+*.pdf

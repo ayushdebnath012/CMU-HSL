@@ -1,0 +1,34 @@
+{
+  "scene_ply": "outputs/bicycle/point_cloud/iteration_30000/point_cloud.ply",
+  "asset_ply": "outputs/chair/point_cloud/iteration_30000/point_cloud.ply",
+  "output_ply": "outputs/composed_bicycle_chair/point_cloud/iteration_30000/point_cloud.ply",
+  "asset_transform": {
+    "scale": 0.15,
+    "rotation_degrees": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "translation": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "appearance": {
+    "opacity_multiplier": 1.0,
+    "dc_color_multiplier": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "dc_color_bias": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sh_rest_multiplier": 1.0
+  },
+  "notes": "Initial placement. Update with tools/interactive_place.py or edit by hand after inspecting bounds."
+}
+
