@@ -9,6 +9,33 @@ Use this when your laptop cannot run 3DGS training locally. The workflow is:
 
 Colab setup changes often, so treat this as a practical baseline. If a CUDA extension fails to compile, restart the runtime and run the setup cells again.
 
+## One-Command Version
+
+Put `nerf_synthetic.zip` in:
+
+```text
+/content/drive/MyDrive/HSL_3DGS/nerf_synthetic.zip
+```
+
+Then run this in Colab:
+
+```bash
+git clone https://github.com/ayushdebnath012/CMU-HSL.git /content/CMU-HSL
+bash /content/CMU-HSL/scripts/colab_run_all.sh smoke
+```
+
+If the smoke test works, run the full training:
+
+```bash
+bash /content/CMU-HSL/scripts/colab_run_all.sh full
+```
+
+Optional: choose a different NeRF-Synthetic object if it exists in your zip:
+
+```bash
+ASSET_NAME=lego bash /content/CMU-HSL/scripts/colab_run_all.sh smoke
+```
+
 ## 0. Runtime
 
 In Colab, choose:
@@ -262,4 +289,3 @@ cp -r /content/outputs/composed_model "/content/drive/MyDrive/HSL_3DGS/outputs/"
 - Push source code, configs, docs, and the presentation.
 - Put large trained outputs in Drive or GitHub Releases if needed.
 - In the technical call, be explicit that cross-dataset scale is a similarity-transform ambiguity, then show the bounding-box and visual-anchor procedure you used.
-

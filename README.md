@@ -42,7 +42,14 @@ conda activate gaussian_splatting
 
 The official 3DGS optimizer requires a CUDA GPU, a compatible C++ compiler, and a CUDA SDK/PyTorch setup that can compile the rasterizer extensions.
 
-For Google Colab training, use the copy-paste guide in [docs/colab.md](docs/colab.md).
+For Google Colab training, use the one-shot runner:
+
+```bash
+git clone https://github.com/ayushdebnath012/CMU-HSL.git /content/CMU-HSL
+bash /content/CMU-HSL/scripts/colab_run_all.sh smoke
+```
+
+Then run `bash /content/CMU-HSL/scripts/colab_run_all.sh full` for the full 30k training. More details are in [docs/colab.md](docs/colab.md).
 
 ## Data
 
