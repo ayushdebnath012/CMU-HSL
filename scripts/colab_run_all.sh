@@ -45,13 +45,12 @@ echo "Mode: $MODE"
 echo "Iterations: $ITERATIONS"
 echo "Asset: $ASSET_NAME"
 
-python - <<'PY'
-try:
-    from google.colab import drive
-    drive.mount("/content/drive")
-except Exception as exc:
-    print(f"Drive mount skipped or unavailable: {exc}")
-PY
+if [[ ! -d "/content/drive/MyDrive" ]]; then
+  echo "Google Drive is not mounted."
+  echo "If you need the manual NeRF-Synthetic fallback, mount Drive in a Python Colab cell first:"
+  echo "  from google.colab import drive"
+  echo "  drive.mount('/content/drive')"
+fi
 
 python - <<'PY'
 import torch
@@ -103,8 +102,12 @@ if [[ ! -d "$ASSET_DATA" ]]; then
       echo "Manual fallback:"
       echo "  1. Download NeRF-Synthetic from https://www.matthewtancik.com/nerf"
       echo "  2. Rename it to nerf_synthetic.zip"
-      echo "  3. Upload it to $NERF_ZIP"
-      echo "  4. Rerun this script"
+      echo "  3. Upload it to Google Drive at MyDrive/HSL_3DGS/nerf_synthetic.zip"
+      echo "  4. Mount Drive in Colab before running this script"
+      echo "     from google.colab import drive"
+      echo "     drive.mount('/content/drive')"
+      echo "  5. The script will then see it at $NERF_ZIP"
+      echo "  6. Rerun this script"
       exit 1
     fi
   fi
