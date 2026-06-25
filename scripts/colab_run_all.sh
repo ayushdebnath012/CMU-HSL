@@ -20,6 +20,11 @@ DATA_DIR="${DATA_DIR:-/content/data}"
 OUT_DIR="${OUT_DIR:-/content/outputs}"
 DRIVE_ROOT="${DRIVE_ROOT:-/content/drive/MyDrive/HSL_3DGS}"
 NERF_ZIP="${NERF_ZIP:-$DRIVE_ROOT/nerf_synthetic.zip}"
+NERF_DOWNLOAD_ZIP="${NERF_DOWNLOAD_ZIP:-$DATA_DIR/nerf_synthetic.zip}"
+# Common public Google Drive file ID for the original NeRF Blender synthetic zip.
+# Google occasionally rate-limits or changes Drive access behavior, so the script
+# falls back to a user-uploaded zip if this download fails.
+NERF_SYNTHETIC_GDRIVE_ID="${NERF_SYNTHETIC_GDRIVE_ID:-18JxhpWD-4ZmuFKLzKlAw-w5PpzZxXOcG}"
 
 if [[ "$MODE" == "full" ]]; then
   ITERATIONS=30000
@@ -85,12 +90,24 @@ if [[ ! -d "$BICYCLE_DATA" ]]; then
 fi
 
 if [[ ! -d "$ASSET_DATA" ]]; then
-  if [[ ! -f "$NERF_ZIP" ]]; then
-    echo "Missing NeRF-Synthetic zip: $NERF_ZIP"
-    echo "Upload nerf_synthetic.zip to $DRIVE_ROOT/nerf_synthetic.zip and rerun."
-    exit 1
+  if [[ -f "$NERF_ZIP" ]]; then
+    unzip -q "$NERF_ZIP" -d "$DATA_DIR"
+  else
+    echo "NeRF-Synthetic zip not found in Drive; trying public gdown download."
+    pip install -q gdown
+    if gdown --id "$NERF_SYNTHETIC_GDRIVE_ID" -O "$NERF_DOWNLOAD_ZIP"; then
+      unzip -q "$NERF_DOWNLOAD_ZIP" -d "$DATA_DIR"
+    else
+      echo "Automatic NeRF-Synthetic download failed."
+      echo "Google Drive may have blocked public/scripted access."
+      echo "Manual fallback:"
+      echo "  1. Download NeRF-Synthetic from https://www.matthewtancik.com/nerf"
+      echo "  2. Rename it to nerf_synthetic.zip"
+      echo "  3. Upload it to $NERF_ZIP"
+      echo "  4. Rerun this script"
+      exit 1
+    fi
   fi
-  unzip -q "$NERF_ZIP" -d "$DATA_DIR"
 fi
 
 if [[ ! -d "$BICYCLE_DATA" ]]; then
@@ -175,4 +192,3 @@ echo "Done."
 echo "Saved outputs to: $DRIVE_ROOT/outputs"
 echo "Composed PLY: $COMPOSED_PLY"
 echo "Rendered model: $RENDER_MODEL"
-
