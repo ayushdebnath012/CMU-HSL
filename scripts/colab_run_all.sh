@@ -24,6 +24,14 @@ trap 'status=$?; echo; echo "ERROR: colab_run_all.sh failed at line $LINENO with
 
 MODE="${1:-lite}"                  # lite, smoke, t4full, or full
 ASSET_NAME="${ASSET_NAME:-chair}"
+ASSET_SCALE="${ASSET_SCALE:-0.15}"
+ASSET_RX="${ASSET_RX:-0.0}"
+ASSET_RY="${ASSET_RY:-0.0}"
+ASSET_RZ="${ASSET_RZ:-0.0}"
+ASSET_TX="${ASSET_TX:-0.0}"
+ASSET_TY="${ASSET_TY:-0.0}"
+ASSET_TZ="${ASSET_TZ:-0.0}"
+ASSET_OPACITY="${ASSET_OPACITY:-1.0}"
 PROJECT_REPO="${PROJECT_REPO:-https://github.com/ayushdebnath012/CMU-HSL.git}"
 PROJECT_DIR="${PROJECT_DIR:-/content/CMU-HSL}"
 GS_DIR="${GS_DIR:-/content/gaussian-splatting}"
@@ -76,6 +84,7 @@ echo "Asset: $ASSET_NAME"
 echo "Bicycle image folder: $BICYCLE_IMAGES"
 echo "Extra train args: $TRAIN_EXTRA_ARGS"
 echo "Log file: $LOG_FILE"
+echo "Asset transform: scale=$ASSET_SCALE rotation=[$ASSET_RX,$ASSET_RY,$ASSET_RZ] translation=[$ASSET_TX,$ASSET_TY,$ASSET_TZ] opacity=$ASSET_OPACITY"
 
 if [[ ! -d "/content/drive/MyDrive" ]]; then
   echo "Google Drive is not mounted."
@@ -202,6 +211,18 @@ config = json.load(open("$PROJECT_DIR/configs/bicycle_chair.json"))
 config["scene_ply"] = "$SCENE_PLY"
 config["asset_ply"] = "$ASSET_PLY"
 config["output_ply"] = "$COMPOSED_PLY"
+config["asset_transform"]["scale"] = float("$ASSET_SCALE")
+config["asset_transform"]["rotation_degrees"] = [
+    float("$ASSET_RX"),
+    float("$ASSET_RY"),
+    float("$ASSET_RZ"),
+]
+config["asset_transform"]["translation"] = [
+    float("$ASSET_TX"),
+    float("$ASSET_TY"),
+    float("$ASSET_TZ"),
+]
+config["appearance"]["opacity_multiplier"] = float("$ASSET_OPACITY")
 json.dump(config, open("$TMP_CONFIG", "w"), indent=2)
 print(open("$TMP_CONFIG").read())
 PY
