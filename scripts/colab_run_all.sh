@@ -32,6 +32,7 @@ ASSET_TX="${ASSET_TX:-0.0}"
 ASSET_TY="${ASSET_TY:-0.0}"
 ASSET_TZ="${ASSET_TZ:-0.0}"
 ASSET_OPACITY="${ASSET_OPACITY:-1.0}"
+RUN_TAG="${RUN_TAG:-}"
 PROJECT_REPO="${PROJECT_REPO:-https://github.com/ayushdebnath012/CMU-HSL.git}"
 PROJECT_DIR="${PROJECT_DIR:-/content/CMU-HSL}"
 GS_DIR="${GS_DIR:-/content/gaussian-splatting}"
@@ -75,6 +76,10 @@ else
   TRAIN_EXTRA_ARGS="${TRAIN_EXTRA_ARGS:---test_iterations -1 --densify_until_iter 1000 --densify_grad_threshold 0.001 --densification_interval 300}"
 fi
 
+if [[ -n "$RUN_TAG" ]]; then
+  COMPOSED_MODEL="${COMPOSED_MODEL}_${RUN_TAG}"
+fi
+
 BICYCLE_DATA="$DATA_DIR/360_v2/bicycle"
 ASSET_DATA="$DATA_DIR/nerf_synthetic/$ASSET_NAME"
 
@@ -85,6 +90,7 @@ echo "Bicycle image folder: $BICYCLE_IMAGES"
 echo "Extra train args: $TRAIN_EXTRA_ARGS"
 echo "Log file: $LOG_FILE"
 echo "Asset transform: scale=$ASSET_SCALE rotation=[$ASSET_RX,$ASSET_RY,$ASSET_RZ] translation=[$ASSET_TX,$ASSET_TY,$ASSET_TZ] opacity=$ASSET_OPACITY"
+echo "Run tag: ${RUN_TAG:-none}"
 
 if [[ ! -d "/content/drive/MyDrive" ]]; then
   echo "Google Drive is not mounted."
@@ -231,13 +237,20 @@ python tools/scene_stats.py "$SCENE_PLY" --pretty
 python tools/scene_stats.py "$ASSET_PLY" --pretty
 python tools/compose_splats.py --config "$TMP_CONFIG"
 
-PREVIEW="$OUT_DIR/composed_bicycle_${ASSET_NAME}_${MODE}_bounds.png"
+PREVIEW_SUFFIX="${MODE}"
+if [[ -n "$RUN_TAG" ]]; then
+  PREVIEW_SUFFIX="${PREVIEW_SUFFIX}_${RUN_TAG}"
+fi
+PREVIEW="$OUT_DIR/composed_bicycle_${ASSET_NAME}_${PREVIEW_SUFFIX}_bounds.png"
 python tools/preview_placement.py \
   --config "$TMP_CONFIG" \
   --out "$PREVIEW"
 
 # Render by copying the Bicycle model directory and replacing only the PLY.
 RENDER_MODEL="$OUT_DIR/render_composed_bicycle_${ASSET_NAME}_${MODE}"
+if [[ -n "$RUN_TAG" ]]; then
+  RENDER_MODEL="${RENDER_MODEL}_${RUN_TAG}"
+fi
 rm -rf "$RENDER_MODEL"
 cp -r "$BICYCLE_MODEL" "$RENDER_MODEL"
 mkdir -p "$RENDER_MODEL/point_cloud/iteration_${ITERATIONS}"
