@@ -70,9 +70,14 @@ echo "Log file: $LOG_FILE"
 
 if [[ ! -d "/content/drive/MyDrive" ]]; then
   echo "Google Drive is not mounted."
-  echo "If you need the manual NeRF-Synthetic fallback, mount Drive in a Python Colab cell first:"
+  echo "Mount Drive in a Python Colab cell first:"
   echo "  from google.colab import drive"
   echo "  drive.mount('/content/drive')"
+  echo "Then rerun this script."
+  echo "Set ALLOW_NO_DRIVE=1 only if you intentionally do not want Drive output copies."
+  if [[ "${ALLOW_NO_DRIVE:-0}" != "1" ]]; then
+    exit 1
+  fi
 fi
 
 python - <<'PY'
@@ -107,7 +112,9 @@ pip install -q submodules/simple-knn
 
 if [[ ! -d "$BICYCLE_DATA" ]]; then
   mkdir -p "$DATA_DIR/360_v2"
-  wget -c http://storage.googleapis.com/gresearch/refraw360/360_v2.zip -O "$DATA_DIR/360_v2.zip"
+  wget -c --progress=bar:force:noscroll \
+    http://storage.googleapis.com/gresearch/refraw360/360_v2.zip \
+    -O "$DATA_DIR/360_v2.zip"
   unzip -q "$DATA_DIR/360_v2.zip" -d "$DATA_DIR/360_v2"
 fi
 
