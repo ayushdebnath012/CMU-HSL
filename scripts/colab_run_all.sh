@@ -8,6 +8,7 @@ fi
 LOG_FILE="${LOG_FILE:-/content/hsl_colab_run.log}"
 mkdir -p "$(dirname "$LOG_FILE")"
 exec > >(tee -a "$LOG_FILE") 2>&1
+trap 'status=$?; echo; echo "ERROR: colab_run_all.sh failed at line $LINENO with exit code $status"; echo "Inspect log with: tail -n 160 $LOG_FILE"; exit $status' ERR
 
 # One-shot Colab runner for the HSL 3DGS composition assignment.
 #
