@@ -5,13 +5,14 @@ set -euo pipefail
 #
 # Usage in Colab:
 #   !git clone https://github.com/ayushdebnath012/CMU-HSL.git /content/CMU-HSL
+#   !bash /content/CMU-HSL/scripts/colab_run_all.sh lite
 #   !bash /content/CMU-HSL/scripts/colab_run_all.sh smoke
 #   !bash /content/CMU-HSL/scripts/colab_run_all.sh full
 #
 # Before running, put nerf_synthetic.zip in:
 #   /content/drive/MyDrive/HSL_3DGS/nerf_synthetic.zip
 
-MODE="${1:-smoke}"                 # smoke or full
+MODE="${1:-lite}"                  # lite, smoke, or full
 ASSET_NAME="${ASSET_NAME:-chair}"
 PROJECT_REPO="${PROJECT_REPO:-https://github.com/ayushdebnath012/CMU-HSL.git}"
 PROJECT_DIR="${PROJECT_DIR:-/content/CMU-HSL}"
@@ -27,15 +28,26 @@ NERF_DOWNLOAD_ZIP="${NERF_DOWNLOAD_ZIP:-$DATA_DIR/nerf_synthetic.zip}"
 NERF_SYNTHETIC_GDRIVE_ID="${NERF_SYNTHETIC_GDRIVE_ID:-18JxhpWD-4ZmuFKLzKlAw-w5PpzZxXOcG}"
 
 if [[ "$MODE" == "full" ]]; then
-  ITERATIONS=30000
+  ITERATIONS="${ITERATIONS_OVERRIDE:-30000}"
   BICYCLE_MODEL="$OUT_DIR/bicycle"
   ASSET_MODEL="$OUT_DIR/$ASSET_NAME"
   COMPOSED_MODEL="$OUT_DIR/composed_bicycle_${ASSET_NAME}"
-else
-  ITERATIONS=7000
+  BICYCLE_IMAGES="${BICYCLE_IMAGES:-images_4}"
+  TRAIN_EXTRA_ARGS="${TRAIN_EXTRA_ARGS:---test_iterations -1}"
+elif [[ "$MODE" == "smoke" ]]; then
+  ITERATIONS="${ITERATIONS_OVERRIDE:-7000}"
   BICYCLE_MODEL="$OUT_DIR/bicycle_7k"
   ASSET_MODEL="$OUT_DIR/${ASSET_NAME}_7k"
   COMPOSED_MODEL="$OUT_DIR/composed_bicycle_${ASSET_NAME}_7k"
+  BICYCLE_IMAGES="${BICYCLE_IMAGES:-images_8}"
+  TRAIN_EXTRA_ARGS="${TRAIN_EXTRA_ARGS:---test_iterations -1 --densify_until_iter 3000 --densify_grad_threshold 0.0005 --densification_interval 200}"
+else
+  ITERATIONS="${ITERATIONS_OVERRIDE:-3000}"
+  BICYCLE_MODEL="$OUT_DIR/bicycle_lite"
+  ASSET_MODEL="$OUT_DIR/${ASSET_NAME}_lite"
+  COMPOSED_MODEL="$OUT_DIR/composed_bicycle_${ASSET_NAME}_lite"
+  BICYCLE_IMAGES="${BICYCLE_IMAGES:-images_8}"
+  TRAIN_EXTRA_ARGS="${TRAIN_EXTRA_ARGS:---test_iterations -1 --densify_until_iter 1000 --densify_grad_threshold 0.001 --densification_interval 300}"
 fi
 
 BICYCLE_DATA="$DATA_DIR/360_v2/bicycle"
@@ -44,6 +56,8 @@ ASSET_DATA="$DATA_DIR/nerf_synthetic/$ASSET_NAME"
 echo "Mode: $MODE"
 echo "Iterations: $ITERATIONS"
 echo "Asset: $ASSET_NAME"
+echo "Bicycle image folder: $BICYCLE_IMAGES"
+echo "Extra train args: $TRAIN_EXTRA_ARGS"
 
 if [[ ! -d "/content/drive/MyDrive" ]]; then
   echo "Google Drive is not mounted."
@@ -132,10 +146,11 @@ if [[ ! -f "$BICYCLE_MODEL/point_cloud/iteration_${ITERATIONS}/point_cloud.ply" 
     -s "$BICYCLE_DATA" \
     -m "$BICYCLE_MODEL" \
     --eval \
-    -i images_4 \
+    -i "$BICYCLE_IMAGES" \
     --data_device cpu \
     --iterations "$ITERATIONS" \
-    --save_iterations "$ITERATIONS"
+    --save_iterations "$ITERATIONS" \
+    $TRAIN_EXTRA_ARGS
 fi
 
 if [[ ! -f "$ASSET_MODEL/point_cloud/iteration_${ITERATIONS}/point_cloud.ply" ]]; then
@@ -145,7 +160,8 @@ if [[ ! -f "$ASSET_MODEL/point_cloud/iteration_${ITERATIONS}/point_cloud.ply" ]]
     --eval \
     -w \
     --iterations "$ITERATIONS" \
-    --save_iterations "$ITERATIONS"
+    --save_iterations "$ITERATIONS" \
+    $TRAIN_EXTRA_ARGS
 fi
 
 cd "$PROJECT_DIR"
