@@ -15,12 +15,13 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 #   !git clone https://github.com/ayushdebnath012/CMU-HSL.git /content/CMU-HSL
 #   !bash /content/CMU-HSL/scripts/colab_run_all.sh lite
 #   !bash /content/CMU-HSL/scripts/colab_run_all.sh smoke
+#   !bash /content/CMU-HSL/scripts/colab_run_all.sh t4full
 #   !bash /content/CMU-HSL/scripts/colab_run_all.sh full
 #
 # Before running, put nerf_synthetic.zip in:
 #   /content/drive/MyDrive/HSL_3DGS/nerf_synthetic.zip
 
-MODE="${1:-lite}"                  # lite, smoke, or full
+MODE="${1:-lite}"                  # lite, smoke, t4full, or full
 ASSET_NAME="${ASSET_NAME:-chair}"
 PROJECT_REPO="${PROJECT_REPO:-https://github.com/ayushdebnath012/CMU-HSL.git}"
 PROJECT_DIR="${PROJECT_DIR:-/content/CMU-HSL}"
@@ -49,6 +50,13 @@ elif [[ "$MODE" == "smoke" ]]; then
   COMPOSED_MODEL="$OUT_DIR/composed_bicycle_${ASSET_NAME}_7k"
   BICYCLE_IMAGES="${BICYCLE_IMAGES:-images_8}"
   TRAIN_EXTRA_ARGS="${TRAIN_EXTRA_ARGS:---test_iterations -1 --densify_until_iter 3000 --densify_grad_threshold 0.0005 --densification_interval 200}"
+elif [[ "$MODE" == "t4full" ]]; then
+  ITERATIONS="${ITERATIONS_OVERRIDE:-30000}"
+  BICYCLE_MODEL="$OUT_DIR/bicycle_t4full"
+  ASSET_MODEL="$OUT_DIR/${ASSET_NAME}_t4full"
+  COMPOSED_MODEL="$OUT_DIR/composed_bicycle_${ASSET_NAME}_t4full"
+  BICYCLE_IMAGES="${BICYCLE_IMAGES:-images_8}"
+  TRAIN_EXTRA_ARGS="${TRAIN_EXTRA_ARGS:---test_iterations -1 --densify_until_iter 12000 --densify_grad_threshold 0.001 --densification_interval 300}"
 else
   ITERATIONS="${ITERATIONS_OVERRIDE:-3000}"
   BICYCLE_MODEL="$OUT_DIR/bicycle_lite"
