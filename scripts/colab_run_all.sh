@@ -195,9 +195,8 @@ python tools/scene_stats.py "$ASSET_PLY" --pretty
 python tools/compose_splats.py --config "$TMP_CONFIG"
 
 PREVIEW="$OUT_DIR/composed_bicycle_${ASSET_NAME}_${MODE}_bounds.png"
-python tools/preview_bounds.py \
-  --scene "$SCENE_PLY" \
-  --asset "$COMPOSED_PLY" \
+python tools/preview_placement.py \
+  --config "$TMP_CONFIG" \
   --out "$PREVIEW"
 
 # Render by copying the Bicycle model directory and replacing only the PLY.
