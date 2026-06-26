@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [[ "${DEBUG:-0}" == "1" ]]; then
+  set -x
+fi
+
+LOG_FILE="${LOG_FILE:-/content/hsl_colab_run.log}"
+mkdir -p "$(dirname "$LOG_FILE")"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 # One-shot Colab runner for the HSL 3DGS composition assignment.
 #
 # Usage in Colab:
@@ -58,6 +66,7 @@ echo "Iterations: $ITERATIONS"
 echo "Asset: $ASSET_NAME"
 echo "Bicycle image folder: $BICYCLE_IMAGES"
 echo "Extra train args: $TRAIN_EXTRA_ARGS"
+echo "Log file: $LOG_FILE"
 
 if [[ ! -d "/content/drive/MyDrive" ]]; then
   echo "Google Drive is not mounted."
@@ -211,3 +220,4 @@ echo "Done."
 echo "Saved outputs to: $DRIVE_ROOT/outputs"
 echo "Composed PLY: $COMPOSED_PLY"
 echo "Rendered model: $RENDER_MODEL"
+echo "Log file: $LOG_FILE"
