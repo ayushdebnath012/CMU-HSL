@@ -51,6 +51,15 @@ bash /content/CMU-HSL/scripts/colab_run_all.sh smoke
 
 Then run `bash /content/CMU-HSL/scripts/colab_run_all.sh full` for the full 30k training. More details are in [docs/colab.md](docs/colab.md).
 
+For Kaggle training, use:
+
+```bash
+git clone https://github.com/ayushdebnath012/CMU-HSL.git /kaggle/working/CMU-HSL
+bash /kaggle/working/CMU-HSL/scripts/kaggle_run_all.sh t4full
+```
+
+More details are in [docs/kaggle.md](docs/kaggle.md).
+
 ## Data
 
 Download Mip-NeRF 360:
