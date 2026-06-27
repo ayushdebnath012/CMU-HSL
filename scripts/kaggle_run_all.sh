@@ -156,8 +156,17 @@ fi
 if [[ ! -d "$ASSET_DATA" ]]; then
   FOUND_ASSET="$(find /kaggle/input "$DATA_DIR" -path "*/nerf_synthetic/$ASSET_NAME/transforms_train.json" -print -quit 2>/dev/null || true)"
   if [[ -n "$FOUND_ASSET" ]]; then
-    ASSET_DATA="$(dirname "$FOUND_ASSET")"
-    echo "Using extracted NeRF-Synthetic asset: $ASSET_DATA"
+    FOUND_ASSET_DIR="$(dirname "$FOUND_ASSET")"
+    if [[ "$FOUND_ASSET_DIR" == /kaggle/input/* ]]; then
+      ASSET_DATA="$DATA_DIR/nerf_synthetic/$ASSET_NAME"
+      echo "Copying read-only Kaggle input asset to writable path: $ASSET_DATA"
+      mkdir -p "$(dirname "$ASSET_DATA")"
+      rm -rf "$ASSET_DATA"
+      cp -r "$FOUND_ASSET_DIR" "$ASSET_DATA"
+    else
+      ASSET_DATA="$FOUND_ASSET_DIR"
+      echo "Using extracted NeRF-Synthetic asset: $ASSET_DATA"
+    fi
   else
     NERF_ZIP="$(find /kaggle/input "$DATA_DIR" -iname "nerf_synthetic.zip" -print -quit 2>/dev/null || true)"
     if [[ -n "$NERF_ZIP" ]]; then
@@ -280,4 +289,3 @@ echo "Saved outputs to: $EXPORT_DIR"
 echo "Composed PLY: $COMPOSED_PLY"
 echo "Rendered model: $RENDER_MODEL"
 echo "Log file: $LOG_FILE"
-
