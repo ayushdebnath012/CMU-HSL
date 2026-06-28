@@ -188,10 +188,10 @@ def slide_1(prs):
         slide,
         "Composing\n3DGS Assets",
         116,
-        210,
-        650,
-        260,
-        74,
+        190,
+        720,
+        230,
+        66,
         "ink",
         bold=True,
         font="Aptos Display",
@@ -199,84 +199,68 @@ def slide_1(prs):
     )
     add_text(
         slide,
-        "A reproducible baseline for inserting a separately trained foreground object into the Mip-NeRF 360 Bicycle scene.",
+        "Separately train Bicycle and a synthetic chair, then merge the foreground Gaussians into the scene.",
         122,
-        514,
-        660,
-        120,
-        26,
+        470,
+        700,
+        110,
+        24,
         "muted",
     )
-    add_text(slide, "Bicycle scene + synthetic chair", 124, 798, 460, 42, 20, "teal", bold=True)
-    add_text(slide, "June 2026", 124, 854, 240, 36, 18, "muted")
-    pptx_splat_cloud(slide, 1040, 245, 1.45)
-    add_text(slide, "one merged point_cloud.ply", 1060, 820, 520, 45, 24, "ink", bold=True)
-    add_text(slide, "Render together to preserve splat depth and alpha ordering.", 1060, 864, 570, 48, 18, "muted")
+    add_text(slide, "Bicycle scene + synthetic chair", 124, 740, 520, 42, 20, "teal", bold=True)
+    add_text(slide, "June 2026", 124, 790, 240, 36, 18, "muted")
+    add_picture_contain(slide, FINAL_RENDER_PATH, 930, 160, 790, 525)
+    add_rect(slide, 930, 160, 790, 525, "white", "line").fill.transparency = 100
+    add_text(slide, "final composed render", 930, 710, 390, 34, 19, "teal", bold=True)
+    add_text(slide, "one merged point_cloud.ply", 930, 790, 620, 44, 27, "ink", bold=True)
+    add_text(slide, "Rendered with Bicycle cameras for shared depth and alpha ordering.", 930, 840, 700, 70, 21, "muted")
 
 
 def slide_2(prs):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     background(slide)
-    add_text(slide, "Composition Method", 110, 82, 800, 78, 48, "ink", bold=True, font="Aptos Display")
+    add_text(slide, "Composition Method", 110, 82, 900, 78, 48, "ink", bold=True, font="Aptos Display")
     add_text(
         slide,
-        "The foreground asset is transformed in 3DGS parameter space, then rasterized with the scene in one pass.",
+        "The foreground asset is transformed in 3DGS parameter space, then merged before rendering.",
         112,
         150,
-        1000,
+        1180,
         56,
         22,
         "muted",
     )
-    add_line(slide, 180, 370, 1640, 370, "line", 3)
-    for x, color, label, caption in [
-        (250, "blue", "Train", "Bicycle and chair\nas separate 3DGS models"),
-        (790, "gold", "Transform", "p_scene = s R p_object + t\nlog-scale and quaternion updates"),
-        (1330, "coral", "Merge", "write one point_cloud.ply\nrender with Bicycle cameras"),
-    ]:
-        add_circle(slide, x, 292, 150, color, 0)
-        add_text(slide, label, x - 24, 342, 210, 38, 25, "white", bold=True, align=PP_ALIGN.CENTER)
-        add_text(slide, caption, x - 160, 520, 410, 98, 24, "ink", bold=True, align=PP_ALIGN.CENTER)
+    add_text(slide, "p_scene = s R p_asset + t", 250, 280, 1040, 80, 45, "ink", bold=True, align=PP_ALIGN.CENTER)
+    add_line(slide, 300, 395, 1520, 395, "line", 3)
+    steps = [
+        (250, "blue", "Train", "Bicycle scene and chair asset as separate 3DGS models."),
+        (790, "gold", "Transform", "Apply scale, rotation, and translation to every foreground Gaussian."),
+        (1330, "coral", "Merge", "Write one composed point_cloud.ply and render with Bicycle cameras."),
+    ]
+    for x, color, label, body in steps:
+        add_circle(slide, x, 470, 76, color, 0)
+        add_text(slide, label, x - 145, 575, 370, 42, 29, "ink", bold=True, align=PP_ALIGN.CENTER)
+        add_text(slide, body, x - 190, 635, 470, 100, 22, "muted", align=PP_ALIGN.CENTER)
+    add_text(slide, "Gaussian updates", 160, 820, 470, 40, 24, "teal", bold=True)
     add_text(
         slide,
-        "3DGS-specific updates",
+        "center: similarity transform\nscale: add log(s)\nrotation: q_place times q_asset",
+        160,
+        875,
+        650,
         110,
-        755,
-        410,
-        40,
-        24,
-        "teal",
-        bold=True,
-    )
-    add_text(
-        slide,
-        "scale_* += log(s)\nrot_* = q_place * q_asset\nopacity edited in sigmoid alpha space\nf_dc_* and f_rest_* support simple color matching",
-        110,
-        812,
-        760,
-        145,
-        24,
+        21,
         "ink",
     )
+    add_text(slide, "Why this helps", 1030, 820, 430, 40, 24, "coral", bold=True)
     add_text(
         slide,
-        "Why this reduces conflicts",
-        1010,
-        755,
-        430,
-        40,
-        24,
-        "coral",
-        bold=True,
-    )
-    add_text(
-        slide,
-        "No 2D paste step: scene and object Gaussians are depth-sorted and alpha-composited by the same rasterizer.",
-        1010,
-        812,
-        720,
-        92,
-        24,
+        "Scene and asset splats are depth-sorted together, avoiding a separate 2D paste step.",
+        1030,
+        875,
+        690,
+        95,
+        21,
         "ink",
     )
 
@@ -295,30 +279,30 @@ def slide_3(prs):
         22,
         "muted",
     )
-    add_picture_contain(slide, FINAL_RENDER_PATH, 110, 250, 900, 600)
-    add_rect(slide, 110, 250, 900, 600, "white", "line").fill.transparency = 100
-    add_text(slide, "final composed render", 110, 872, 370, 38, 19, "teal", bold=True)
+    add_picture_contain(slide, FINAL_RENDER_PATH, 110, 260, 900, 595)
+    add_rect(slide, 110, 260, 900, 595, "white", "line").fill.transparency = 100
+    add_text(slide, "final composed render", 110, 878, 370, 38, 19, "teal", bold=True)
     rows = [
         (
-            268,
+            280,
             "Result",
             "Separate Bicycle and Chair 3DGS models\nmerged into one splat point cloud.",
             "teal",
         ),
         (
-            430,
+            455,
             "Scale reasoning",
             "Cross-dataset scale is ambiguous;\nbounds and visual anchors define s, R, t.",
             "blue",
         ),
         (
-            592,
+            630,
             "Conflicts",
             "One rasterizer pass gives depth sorting;\nfloaters and soft splats remain visible.",
             "coral",
         ),
         (
-            754,
+            805,
             "Extension idea",
             "Optimize asset-only SH/exposure\nwhile keeping geometry fixed.",
             "gold",
@@ -326,8 +310,8 @@ def slide_3(prs):
     ]
     for y, title, body, color in rows:
         add_circle(slide, 1072, y - 4, 46, color, 0)
-        add_text(slide, title, 1144, y - 14, 460, 42, 29, "ink", bold=True)
-        add_text(slide, body, 1144, y + 38, 620, 92, 23, "muted")
+        add_text(slide, title, 1144, y - 14, 500, 42, 28, "ink", bold=True)
+        add_text(slide, body, 1144, y + 40, 620, 104, 21, "muted")
     add_text(
         slide,
         "Submission assets: code, process notes, Kaggle/Colab runners, final render, and this 3-slide deck.",
@@ -395,18 +379,39 @@ def draw_cloud(draw, origin_x, origin_y, scale=1.0):
         draw.ellipse([xx, yy, xx + dd, yy + dd], fill="#D7613D")
 
 
+def paste_image_contain(canvas: Image.Image, path: Path, box: tuple[int, int, int, int]) -> None:
+    x, y, w, h = box
+    draw = ImageDraw.Draw(canvas)
+    draw.rectangle([x, y, x + w, y + h], fill="#" + COLORS["white"], outline="#" + COLORS["line"], width=2)
+    if not path.exists():
+        draw_text(draw, (x + 40, y + h // 2), f"{path.name} missing", 34, "muted")
+        return
+    image = Image.open(path).convert("RGB")
+    img_ratio = image.width / image.height
+    frame_ratio = w / h
+    if img_ratio >= frame_ratio:
+        new_w = w
+        new_h = round(new_w / img_ratio)
+    else:
+        new_h = h
+        new_w = round(new_h * img_ratio)
+    image = image.resize((new_w, new_h), Image.Resampling.LANCZOS)
+    canvas.paste(image, (x + (w - new_w) // 2, y + (h - new_h) // 2))
+
+
 def preview_slide_1(path: Path) -> None:
     img = Image.new("RGB", (W, H), "#" + COLORS["paper"])
     draw = ImageDraw.Draw(img)
     draw.rectangle([0, 0, 34, H], fill="#" + COLORS["teal"])
     draw_text(draw, (118, 92), "Human Sensing Lab\nTechnical Assessment", 32, "muted")
-    draw_text(draw, (116, 210), "Composing\n3DGS Assets", 92, "ink", True, spacing=0)
-    draw_text(draw, (122, 514), "A reproducible baseline for inserting a separately trained\nforeground object into the Mip-NeRF 360 Bicycle scene.", 31, "muted")
-    draw_text(draw, (124, 798), "Bicycle scene + synthetic chair", 28, "teal", True)
-    draw_text(draw, (124, 854), "June 2026", 25, "muted")
-    draw_cloud(draw, 1040, 245, 1.45)
-    draw_text(draw, (1060, 820), "one merged point_cloud.ply", 34, "ink", True)
-    draw_text(draw, (1060, 864), "Render together to preserve splat depth and alpha ordering.", 26, "muted")
+    draw_text(draw, (116, 190), "Composing\n3DGS Assets", 84, "ink", True, spacing=0)
+    draw_text(draw, (122, 470), "Separately train Bicycle and a synthetic chair,\nthen merge the foreground Gaussians into the scene.", 30, "muted")
+    draw_text(draw, (124, 740), "Bicycle scene + synthetic chair", 28, "teal", True)
+    draw_text(draw, (124, 790), "June 2026", 25, "muted")
+    paste_image_contain(img, FINAL_RENDER_PATH, (930, 160, 790, 525))
+    draw_text(draw, (930, 710), "final composed render", 27, "teal", True)
+    draw_text(draw, (930, 790), "one merged point_cloud.ply", 36, "ink", True)
+    draw_text(draw, (930, 840), "Rendered with Bicycle cameras for shared\ndepth and alpha ordering.", 28, "muted")
     img.save(path)
 
 
@@ -414,20 +419,23 @@ def preview_slide_2(path: Path) -> None:
     img = Image.new("RGB", (W, H), "#" + COLORS["paper"])
     draw = ImageDraw.Draw(img)
     draw_text(draw, (110, 82), "Composition Method", 62, "ink", True)
-    draw_text(draw, (112, 150), "The foreground asset is transformed in 3DGS parameter space, then rasterized with the scene in one pass.", 30, "muted")
-    draw.line([180, 370, 1640, 370], fill="#" + COLORS["line"], width=5)
-    for x, color, label, caption in [
-        (250, "blue", "Train", "Bicycle and chair\nas separate 3DGS models"),
-        (790, "gold", "Transform", "p_scene = s R p_object + t\nlog-scale and quaternion updates"),
-        (1330, "coral", "Merge", "write one point_cloud.ply\nrender with Bicycle cameras"),
-    ]:
-        draw.ellipse([x, 292, x + 150, 442], fill="#" + COLORS[color])
-        draw_text(draw, (x + 75, 367), label, 31, "white", True, anchor="mm")
-        draw_text(draw, (x - 160, 520), caption, 31, "ink", True)
-    draw_text(draw, (110, 755), "3DGS-specific updates", 32, "teal", True)
-    draw_text(draw, (110, 812), "scale_* += log(s)\nrot_* = q_place * q_asset\nopacity edited in sigmoid alpha space\nf_dc_* and f_rest_* support simple color matching", 31, "ink")
-    draw_text(draw, (1010, 755), "Why this reduces conflicts", 32, "coral", True)
-    draw_text(draw, (1010, 812), "No 2D paste step: scene and object Gaussians are depth-sorted\nand alpha-composited by the same rasterizer.", 31, "ink")
+    draw_text(draw, (112, 150), "The foreground asset is transformed in 3DGS parameter space, then merged before rendering.", 30, "muted")
+    draw_text(draw, (960, 320), "p_scene = s R p_asset + t", 58, "ink", True, anchor="mm")
+    draw.line([300, 395, 1520, 395], fill="#" + COLORS["line"], width=5)
+    steps = [
+        (250, "blue", "Train", "Bicycle scene and chair asset\nas separate 3DGS models."),
+        (790, "gold", "Transform", "Apply scale, rotation, and translation\nto every foreground Gaussian."),
+        (1330, "coral", "Merge", "Write one composed point_cloud.ply\nand render with Bicycle cameras."),
+    ]
+    for x, color, label, body in steps:
+        draw.ellipse([x, 470, x + 76, 546], fill="#" + COLORS[color])
+        draw_text(draw, (x + 38, 508), str(steps.index((x, color, label, body)) + 1), 29, "white", True, anchor="mm")
+        draw_text(draw, (x - 145, 575), label, 38, "ink", True)
+        draw_text(draw, (x - 190, 635), body, 28, "muted")
+    draw_text(draw, (160, 820), "Gaussian updates", 32, "teal", True)
+    draw_text(draw, (160, 875), "center: similarity transform\nscale: add log(s)\nrotation: q_place times q_asset", 28, "ink")
+    draw_text(draw, (1030, 820), "Why this helps", 32, "coral", True)
+    draw_text(draw, (1030, 875), "Scene and asset splats are depth-sorted together,\navoiding a separate 2D paste step.", 28, "ink")
     img.save(path)
 
 
@@ -436,30 +444,13 @@ def preview_slide_3(path: Path) -> None:
     draw = ImageDraw.Draw(img)
     draw_text(draw, (110, 82), "Result & Defense", 62, "ink", True)
     draw_text(draw, (112, 150), "The output is not a 2D paste. It is one merged 3DGS point cloud rendered through the Bicycle cameras.", 30, "muted")
-    if FINAL_RENDER_PATH.exists():
-        render = Image.open(FINAL_RENDER_PATH).convert("RGB")
-        render_ratio = render.width / render.height
-        frame_ratio = 900 / 600
-        if render_ratio >= frame_ratio:
-            new_w = 900
-            new_h = round(new_w / render_ratio)
-        else:
-            new_h = 600
-            new_w = round(new_h * render_ratio)
-        render = render.resize((new_w, new_h), Image.Resampling.LANCZOS)
-        frame = Image.new("RGB", (900, 600), "#" + COLORS["white"])
-        frame.paste(render, ((900 - render.width) // 2, (600 - render.height) // 2))
-        img.paste(frame, (110, 250))
-        draw.rectangle([110, 250, 1010, 850], outline="#" + COLORS["line"], width=2)
-    else:
-        draw.rectangle([110, 250, 1010, 850], outline="#" + COLORS["line"], width=2)
-        draw_text(draw, (150, 500), "hsl_final_result.png missing", 34, "muted")
-    draw_text(draw, (110, 872), "final composed render", 27, "teal", True)
+    paste_image_contain(img, FINAL_RENDER_PATH, (110, 260, 900, 595))
+    draw_text(draw, (110, 878), "final composed render", 27, "teal", True)
     rows = [
-        (268, "Result", "Separate Bicycle and Chair 3DGS models\nmerged into one splat point cloud.", "teal"),
-        (430, "Scale reasoning", "Cross-dataset scale is ambiguous;\nbounds and visual anchors define s, R, t.", "blue"),
-        (592, "Conflicts", "One rasterizer pass gives depth sorting;\nfloaters and soft splats remain visible.", "coral"),
-        (754, "Extension idea", "Optimize asset-only SH/exposure\nwhile keeping geometry fixed.", "gold"),
+        (280, "Result", "Separate Bicycle and Chair 3DGS models\nmerged into one splat point cloud.", "teal"),
+        (455, "Scale reasoning", "Cross-dataset scale is ambiguous;\nbounds and visual anchors define s, R, t.", "blue"),
+        (630, "Conflicts", "One rasterizer pass gives depth sorting;\nfloaters and soft splats remain visible.", "coral"),
+        (805, "Extension idea", "Optimize asset-only SH/exposure\nwhile keeping geometry fixed.", "gold"),
     ]
     for y, title, body, color in rows:
         draw.ellipse([1072, y - 4, 1118, y + 42], fill="#" + COLORS[color])
