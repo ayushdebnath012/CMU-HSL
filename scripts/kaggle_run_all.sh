@@ -32,7 +32,7 @@ ASSET_TX="${ASSET_TX:-0.0}"
 ASSET_TY="${ASSET_TY:-0.0}"
 ASSET_TZ="${ASSET_TZ:-0.0}"
 ASSET_OPACITY="${ASSET_OPACITY:-0.30}"
-RUN_TAG="${RUN_TAG:-}"
+RUN_TAG="${RUN_TAG:-${OUTPUT_SUFFIX:-}}"
 
 PROJECT_REPO="${PROJECT_REPO:-https://github.com/ayushdebnath012/CMU-HSL.git}"
 PROJECT_DIR="${PROJECT_DIR:-/kaggle/working/CMU-HSL}"
@@ -87,6 +87,7 @@ echo "Bicycle image folder: $BICYCLE_IMAGES"
 echo "Extra train args: $TRAIN_EXTRA_ARGS"
 echo "Log file: $LOG_FILE"
 echo "Asset transform: scale=$ASSET_SCALE rotation=[$ASSET_RX,$ASSET_RY,$ASSET_RZ] translation=[$ASSET_TX,$ASSET_TY,$ASSET_TZ] opacity=$ASSET_OPACITY"
+echo "Run tag: ${RUN_TAG:-none}"
 
 python - <<'PY'
 import torch
