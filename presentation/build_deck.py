@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "presentation"
 PREVIEW_DIR = OUT_DIR / "previews"
 PPTX_PATH = OUT_DIR / "HSL_Technical_Assessment_3DGS_Composition.pptx"
+FINAL_RENDER_PATH = ROOT / "hsl_final_result.png"
 
 W, H = 1920, 1080
 SLIDE_W_IN, SLIDE_H_IN = 13.333, 7.5
@@ -113,6 +114,25 @@ def add_line(slide, x1, y1, x2, y2, color="line", width=2):
     line.line.color.rgb = rgb(COLORS[color])
     line.line.width = Pt(width)
     return line
+
+
+def add_picture_contain(slide, path: Path, x: float, y: float, w: float, h: float):
+    if not path.exists():
+        return None
+    image = Image.open(path)
+    img_w, img_h = image.size
+    frame_ratio = w / h
+    img_ratio = img_w / img_h
+    if img_ratio >= frame_ratio:
+        draw_w = w
+        draw_h = w / img_ratio
+    else:
+        draw_h = h
+        draw_w = h * img_ratio
+    draw_x = x + (w - draw_w) / 2
+    draw_y = y + (h - draw_h) / 2
+    left, top, width, height = [Inches(v) for v in px_to_in(draw_x, draw_y, draw_w, draw_h)]
+    return slide.shapes.add_picture(str(path), left, top, width=width, height=height)
 
 
 def background(slide):
@@ -264,54 +284,56 @@ def slide_2(prs):
 def slide_3(prs):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     background(slide)
-    add_text(slide, "What I Would Defend", 110, 82, 850, 78, 48, "ink", bold=True, font="Aptos Display")
+    add_text(slide, "Result & Defense", 110, 82, 850, 78, 48, "ink", bold=True, font="Aptos Display")
     add_text(
         slide,
-        "The hard part is not only training splats. It is choosing a defensible cross-dataset similarity transform.",
+        "The output is not a 2D paste. It is one merged 3DGS point cloud rendered through the Bicycle cameras.",
         112,
         150,
-        1110,
+        1260,
         56,
         22,
         "muted",
     )
-    add_line(slide, 118, 295, 118, 860, "line", 3)
+    add_picture_contain(slide, FINAL_RENDER_PATH, 110, 250, 900, 600)
+    add_rect(slide, 110, 250, 900, 600, "white", "line").fill.transparency = 100
+    add_text(slide, "final composed render", 110, 872, 370, 38, 19, "teal", bold=True)
     rows = [
         (
-            270,
-            "Scale ambiguity",
-            "COLMAP and Blender cameras are internally calibrated,\nbut Bicycle and Chair do not share a metric ruler.",
+            268,
+            "Result",
+            "Separate Bicycle and Chair 3DGS models\nmerged into one splat point cloud.",
             "teal",
         ),
         (
-            455,
-            "Practical baseline",
-            "Use bounds, visual anchors, and an interactive placement loop;\nkeep every value in the JSON config.",
+            430,
+            "Scale reasoning",
+            "Cross-dataset scale is ambiguous;\nbounds and visual anchors define s, R, t.",
             "blue",
         ),
         (
-            640,
-            "Likely bottlenecks",
-            "CUDA setup, floaters, splat intersections, and color mismatch\nbetween real outdoor imagery and synthetic lighting.",
+            592,
+            "Conflicts",
+            "One rasterizer pass gives depth sorting;\nfloaters and soft splats remain visible.",
             "coral",
         ),
         (
-            825,
+            754,
             "Extension idea",
-            "Optimize a small asset-only SH/exposure correction while keeping geometry fixed.",
+            "Optimize asset-only SH/exposure\nwhile keeping geometry fixed.",
             "gold",
         ),
     ]
     for y, title, body, color in rows:
-        add_circle(slide, 92, y - 9, 52, color, 0)
-        add_text(slide, title, 172, y - 18, 470, 42, 29, "ink", bold=True)
-        add_text(slide, body, 650, y - 18, 950, 64, 24, "muted")
+        add_circle(slide, 1072, y - 4, 46, color, 0)
+        add_text(slide, title, 1144, y - 14, 460, 42, 29, "ink", bold=True)
+        add_text(slide, body, 1144, y + 38, 620, 92, 23, "muted")
     add_text(
         slide,
-        "Submission assets: scripts, composer, placement UI, process notes, and this 3-slide deck.",
+        "Submission assets: code, process notes, Kaggle/Colab runners, final render, and this 3-slide deck.",
         110,
         960,
-        1300,
+        1460,
         34,
         18,
         "muted",
@@ -412,20 +434,38 @@ def preview_slide_2(path: Path) -> None:
 def preview_slide_3(path: Path) -> None:
     img = Image.new("RGB", (W, H), "#" + COLORS["paper"])
     draw = ImageDraw.Draw(img)
-    draw_text(draw, (110, 82), "What I Would Defend", 62, "ink", True)
-    draw_text(draw, (112, 150), "The hard part is not only training splats. It is choosing a defensible cross-dataset similarity transform.", 30, "muted")
-    draw.line([118, 295, 118, 860], fill="#" + COLORS["line"], width=5)
+    draw_text(draw, (110, 82), "Result & Defense", 62, "ink", True)
+    draw_text(draw, (112, 150), "The output is not a 2D paste. It is one merged 3DGS point cloud rendered through the Bicycle cameras.", 30, "muted")
+    if FINAL_RENDER_PATH.exists():
+        render = Image.open(FINAL_RENDER_PATH).convert("RGB")
+        render_ratio = render.width / render.height
+        frame_ratio = 900 / 600
+        if render_ratio >= frame_ratio:
+            new_w = 900
+            new_h = round(new_w / render_ratio)
+        else:
+            new_h = 600
+            new_w = round(new_h * render_ratio)
+        render = render.resize((new_w, new_h), Image.Resampling.LANCZOS)
+        frame = Image.new("RGB", (900, 600), "#" + COLORS["white"])
+        frame.paste(render, ((900 - render.width) // 2, (600 - render.height) // 2))
+        img.paste(frame, (110, 250))
+        draw.rectangle([110, 250, 1010, 850], outline="#" + COLORS["line"], width=2)
+    else:
+        draw.rectangle([110, 250, 1010, 850], outline="#" + COLORS["line"], width=2)
+        draw_text(draw, (150, 500), "hsl_final_result.png missing", 34, "muted")
+    draw_text(draw, (110, 872), "final composed render", 27, "teal", True)
     rows = [
-        (270, "Scale ambiguity", "COLMAP and Blender cameras are internally calibrated,\nbut Bicycle and Chair do not share a metric ruler.", "teal"),
-        (455, "Practical baseline", "Use bounds, visual anchors, and an interactive placement loop;\nkeep every value in the JSON config.", "blue"),
-        (640, "Likely bottlenecks", "CUDA setup, floaters, splat intersections, and color mismatch\nbetween real outdoor imagery and synthetic lighting.", "coral"),
-        (825, "Extension idea", "Optimize a small asset-only SH/exposure correction while keeping geometry fixed.", "gold"),
+        (268, "Result", "Separate Bicycle and Chair 3DGS models\nmerged into one splat point cloud.", "teal"),
+        (430, "Scale reasoning", "Cross-dataset scale is ambiguous;\nbounds and visual anchors define s, R, t.", "blue"),
+        (592, "Conflicts", "One rasterizer pass gives depth sorting;\nfloaters and soft splats remain visible.", "coral"),
+        (754, "Extension idea", "Optimize asset-only SH/exposure\nwhile keeping geometry fixed.", "gold"),
     ]
     for y, title, body, color in rows:
-        draw.ellipse([92, y - 9, 144, y + 43], fill="#" + COLORS[color])
-        draw_text(draw, (172, y - 18), title, 38, "ink", True)
-        draw_text(draw, (650, y - 18), body, 31, "muted")
-    draw_text(draw, (110, 960), "Submission assets: scripts, composer, placement UI, process notes, and this 3-slide deck.", 25, "muted")
+        draw.ellipse([1072, y - 4, 1118, y + 42], fill="#" + COLORS[color])
+        draw_text(draw, (1144, y - 14), title, 38, "ink", True)
+        draw_text(draw, (1144, y + 38), body, 29, "muted")
+    draw_text(draw, (110, 960), "Submission assets: code, process notes, Kaggle/Colab runners, final render, and this 3-slide deck.", 25, "muted")
     img.save(path)
 
 

@@ -20,6 +20,12 @@ data/                    Local datasets, ignored by Git
 outputs/                 Trained/composed models, ignored by Git
 ```
 
+## Final Submission Artifacts
+
+- Final render: `hsl_final_result.png`
+- Presentation: `presentation/HSL_Technical_Assessment_3DGS_Composition.pptx`
+- Submission checklist: [docs/submission.md](docs/submission.md)
+
 ## Setup
 
 Install the lightweight local tools:
