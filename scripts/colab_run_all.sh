@@ -24,14 +24,14 @@ trap 'status=$?; echo; echo "ERROR: colab_run_all.sh failed at line $LINENO with
 
 MODE="${1:-lite}"                  # lite, smoke, t4full, or full
 ASSET_NAME="${ASSET_NAME:-chair}"
-ASSET_SCALE="${ASSET_SCALE:-0.15}"
+ASSET_SCALE="${ASSET_SCALE:-0.025}"
 ASSET_RX="${ASSET_RX:-0.0}"
 ASSET_RY="${ASSET_RY:-0.0}"
 ASSET_RZ="${ASSET_RZ:-0.0}"
 ASSET_TX="${ASSET_TX:-0.0}"
 ASSET_TY="${ASSET_TY:-0.0}"
 ASSET_TZ="${ASSET_TZ:-0.0}"
-ASSET_OPACITY="${ASSET_OPACITY:-1.0}"
+ASSET_OPACITY="${ASSET_OPACITY:-0.30}"
 RUN_TAG="${RUN_TAG:-}"
 PROJECT_REPO="${PROJECT_REPO:-https://github.com/ayushdebnath012/CMU-HSL.git}"
 PROJECT_DIR="${PROJECT_DIR:-/content/CMU-HSL}"
